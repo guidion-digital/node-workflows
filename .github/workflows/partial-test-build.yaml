@@ -1,0 +1,59 @@
+# Reusable workflow, intended for use in both deploy workflows, and PR workflows
+
+name: Run tests and build
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        description: The Github environment containing all the variables needed
+        required: false
+        type: string
+      concurrency_name:
+        description: Concurrency name used. Falls back to environment name if not set
+        required: false
+        type: string
+      disable_linting:
+        description: Whether to skip linting
+        required: false
+        type: boolean
+        default: false
+      disable_tests:
+        description: Whether to skip tests
+        required: false
+        type: boolean
+        default: false
+      disable_build:
+        description: Whether to skip build
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  test_and_build:
+    name: Test and Build
+    environment: "${{ inputs.environment_name }}"
+    concurrency:
+      group: ${{ inputs.concurrency_name || inputs.environment_name }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "npm"
+      - name: Install dependencies
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          npm install
+      - name: Lint
+        if: ${{ inputs.disable_linting != true }}
+        run: npm run lint -- --max-warnings=0
+      - name: Build
+        if: ${{ inputs.disable_build != true }}
+        run: npm run build
+      - name: Run tests
+        if: ${{ inputs.disable_tests != true }}
+        run: npm test

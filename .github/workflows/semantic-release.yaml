@@ -1,0 +1,33 @@
+# Reusable workflow, intended for use in production deployments
+name: Semantic release
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        description: The Github environment containing all the variables needed
+        required: false
+        type: string
+
+jobs:
+  release:
+    name: Semantic release
+    environment: "${{ inputs.environment_name }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+      - name: Install dependencies
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          npm install
+      - name: Semantic release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run semantic-release

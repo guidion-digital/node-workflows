@@ -24,6 +24,10 @@ jobs:
         with:
           ref: ${{ inputs.pr_branch }}
           fetch-depth: ${{ inputs.fetch_depth }}
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
         with:
@@ -35,19 +39,8 @@ jobs:
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
           npm install
-      - name: Verify base SHA
-        run: |
-          if ! git cat-file -e ${{ inputs.base_sha }}^{commit}; then
-            echo "Base SHA ${{ inputs.base_sha }} does not exist."
-            exit 1
-          fi
       - name: Changed-files test coverage
-        run: |
-          if git diff --quiet ${{ inputs.base_sha }}; then
-            echo "No changes detected since ${{ inputs.base_sha }}."
-          else
-            npm run test:changedsince ${{ inputs.base_sha }} -- --ci --runInBand --reportTestSuiteErrors=true
-          fi
+        run: npm run test:changedsince ${{ inputs.base_sha }} -- --ci --runInBand --reportTestSuiteErrors=true
       - name: Lint
         run: npm run lint -- --max-warnings=0
       - name: TypeScript Compile

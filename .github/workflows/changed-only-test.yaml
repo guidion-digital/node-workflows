@@ -22,7 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.pr_branch }}
           fetch-depth: ${{ inputs.fetch_depth }}
       - name: Dump GitHub context
         env:

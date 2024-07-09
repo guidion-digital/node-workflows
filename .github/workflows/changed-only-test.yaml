@@ -3,10 +3,6 @@ name: Test PRs on acc
 on:
   workflow_call:
     inputs:
-      pr_branch:
-        description: 'The branch of the PR'
-        required: true
-        type: string
       base_sha:
         description: 'The base SHA of the PR'
         required: true

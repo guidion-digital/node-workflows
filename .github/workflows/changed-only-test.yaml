@@ -1,4 +1,4 @@
-name: Test & Lint only changed files
+name: Test & Lint only
 
 on:
   workflow_call:

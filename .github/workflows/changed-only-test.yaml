@@ -11,10 +11,6 @@ on:
         description: 'The base SHA of the PR'
         required: true
         type: string
-      fetch_depth:
-        description: 'The fetch depth for checkout'
-        required: true
-        type: number
 
 jobs:
   test:
@@ -23,11 +19,25 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ inputs.pr_branch }}
-          fetch-depth: ${{ inputs.fetch_depth }}
-      - name: Dump GitHub context
+      - name: Fetch merge base commits
         env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          comparison=$(gh api repos/${{ github.repository }}/compare/${{ inputs.base_sha }}...${{ inputs.pr_branch }})
+          behind_by=$(echo -E $comparison | jq -r '.behind_by')
+          ahead_by=$(echo -E $comparison | jq -r '.ahead_by')
+          echo "ahead_by: $ahead_by; behind by: $behind_by"
+
+          if [[ $behind_by -gt 0 ]]; then
+            echo "Error: MERGE target branch first. This PR is behind the base branch by $behind_by commits."
+            exit 1
+          fi
+
+          if [[ $ahead_by -gt 0 ]]; then
+            head_depth=$((ahead_by+1))
+            echo Fetching head to depth $head_depth
+            git -c protocol.version=2 fetch --no-tags --no-recurse-submodules --depth=$head_depth origin ${{ inputs.pr_branch }}
+          fi
       - name: Use Node.js 18.x
         uses: actions/setup-node@v3
         with:

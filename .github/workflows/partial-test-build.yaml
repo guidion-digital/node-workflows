@@ -13,18 +13,23 @@ on:
         description: Concurrency name used. Falls back to environment name if not set
         required: false
         type: string
-      disable_linting:
+      enable_linting:
         description: Whether to skip linting
         required: false
         type: boolean
-        default: false
-      disable_tests:
+        default: true
+      enable_tests:
         description: Whether to skip tests
         required: false
         type: boolean
-        default: false
-      disable_build:
+        default: true
+      enable_build:
         description: Whether to skip build
+        required: false
+        type: boolean
+        default: true
+      enable_npmrc_echo:
+        description: Whether to run the .npmrc echo step
         required: false
         type: boolean
         default: false
@@ -44,16 +49,17 @@ jobs:
         with:
           node-version: 20.x
           cache: "npm"
+      - name: Setup .npmrc
+        if: ${{ inputs.enable_npmrc_echo }}
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - name: Install dependencies
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-          npm install
+        run: npm install
       - name: Lint
-        if: ${{ inputs.disable_linting != true }}
+        if: ${{ inputs.enable_linting }}
         run: npm run lint -- --max-warnings=0
       - name: Build
-        if: ${{ inputs.disable_build != true }}
+        if: ${{ inputs.enable_build }}
         run: npm run build
       - name: Run tests
-        if: ${{ inputs.disable_tests != true }}
+        if: ${{ inputs.enable_tests }}
         run: npm test

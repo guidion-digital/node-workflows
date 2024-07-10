@@ -8,6 +8,11 @@ on:
         description: The Github environment containing all the variables needed
         required: false
         type: string
+      enable_npmrc_echo:
+        description: Whether to run the .npmrc echo step
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   release:
@@ -22,10 +27,11 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
+      - name: Setup .npmrc
+        if: ${{ inputs.enable_npmrc_echo }}
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - name: Install dependencies
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-          npm install
+        run: npm install
       - name: Semantic release
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

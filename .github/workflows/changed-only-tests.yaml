@@ -34,15 +34,14 @@ jobs:
         with:
           node-version: 18.x
           cache: "npm"
-      - name: Copy default env variables
-        run: cp .env.example .env
       - name: npm install
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
           npm install
-      - name: Changed-files test
-        run: npm run test:changedsince ${{ inputs.base_sha }} -- --ci --runInBand --reportTestSuiteErrors=true
       - name: Lint
         run: npm run lint -- --max-warnings=0
       - name: TypeScript Compile
         run: npm run tsc
+      - name: Changed-files test
+        run: npm run test:changedsince ${{ inputs.base_sha }} -- --ci --runInBand --reportTestSuiteErrors=true
+     

@@ -1,0 +1,47 @@
+name: Test & Lint only
+
+on:
+  workflow_call:
+    inputs:
+      base_sha:
+        description: 'The base SHA of the PR'
+        required: true
+        type: string
+      fetch_depth:
+        description: 'The fetch depth for checkout'
+        required: true
+        type: number
+
+jobs:
+  calculate-fetch-depth:
+    runs-on: ubuntu-latest
+    outputs:
+      fetch_depth: ${{ steps.calc-fetch-depth.outputs.fetch_depth }}
+    steps:
+      - name: Calculate Fetch Depth
+        id: calc-fetch-depth
+        run: echo "fetch_depth=$(( ${{ inputs.fetch_depth }} + 1 ))" >> $GITHUB_OUTPUT
+
+  test:
+    needs: calculate-fetch-depth
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: ${{ needs.calculate-fetch-depth.outputs.fetch_depth }}
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: "npm"
+      - name: npm install
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          npm install
+      - name: Lint
+        run: npm run lint -- --max-warnings=0
+      - name: TypeScript Compile
+        run: npm run tsc
+      - name: Changed-files test
+        run: npm run test:changedsince ${{ inputs.base_sha }} -- --ci --runInBand --reportTestSuiteErrors=true
+     

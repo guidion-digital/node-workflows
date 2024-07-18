@@ -13,6 +13,16 @@ on:
         required: false
         type: boolean
         default: false
+      enable_artifact_download:
+        description: Whether to download the dist folder from artifact
+        required: false
+        type: boolean
+        default: true
+      distPath:
+        description: The path to the dist folder
+        required: false
+        type: string
+        default: dist
 
 jobs:
   release:
@@ -22,6 +32,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Download dist folder
+        if: ${{ inputs.enable_artifact_download }}
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: ${{ inputs.distPath }}
       - name: Use Node.js 20.x
         uses: actions/setup-node@v4
         with:

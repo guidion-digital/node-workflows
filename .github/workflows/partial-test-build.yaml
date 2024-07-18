@@ -33,6 +33,16 @@ on:
         required: false
         type: boolean
         default: false
+      enable_artifact_upload:
+        description: Whether to upload the dist folder as an artifact
+        required: false
+        type: boolean
+        default: true
+      distPath:
+        description: The path to the dist folder
+        required: false
+        type: string
+        default: dist
 
 jobs:
   test_and_build:
@@ -63,3 +73,9 @@ jobs:
       - name: Run tests
         if: ${{ inputs.enable_tests }}
         run: npm test
+      - name: Upload dist folder
+        if: ${{ inputs.enable_build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: ${{ inputs.distPath }}

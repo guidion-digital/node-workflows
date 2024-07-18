@@ -13,8 +13,8 @@ on:
         required: false
         type: boolean
         default: false
-      enable_artifact_upload:
-        description: Whether to upload the dist folder as an artifact
+      enable_artifact_download:
+        description: Whether to download the dist folder from artifact
         required: false
         type: boolean
         default: true
@@ -33,7 +33,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Download dist folder
-        if: ${{ inputs.enable_artifact_upload }}
+        if: ${{ inputs.enable_artifact_download }}
         uses: actions/download-artifact@v4
         with:
           name: dist

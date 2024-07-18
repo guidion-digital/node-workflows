@@ -42,7 +42,7 @@ on:
         description: The path to the dist folder
         required: false
         type: string
-        default: .dist
+        default: dist
 
 jobs:
   test_and_build:

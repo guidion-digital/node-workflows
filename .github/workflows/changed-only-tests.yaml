@@ -21,7 +21,7 @@ jobs:
       - name: Calculate Fetch Depth
         id: calc-fetch-depth
         run: |
-          DEPTH="$(( ${{ inputs.fetch_depth }} + 1 ))"
+          echo "fork"
 
   test:
     needs: calculate-fetch-depth

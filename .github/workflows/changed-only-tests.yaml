@@ -21,7 +21,7 @@ jobs:
       - name: Calculate Fetch Depth
         id: calc-fetch-depth
         run: |
-          echo "fork"
+          echo "fetch_depth=2" >> $GITHUB_OUTPUT
 
   test:
     needs: calculate-fetch-depth

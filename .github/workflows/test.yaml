@@ -2,7 +2,7 @@ name: Test
 
 on:
   pull_request:
-    types: 
+    types:
       - opened
       - edited
       - synchronize
@@ -10,13 +10,14 @@ on:
       - master
 
 jobs:
-  test-workflow:
-    uses: guidion-digital/release-workflows/.github/workflows/github-test-workflow.yaml@v1
-    permissions:
-      pull-requests: write
+  # restore when properly tested and teams are notified
+  # test-workflow:
+  #   uses: guidion-digital/release-workflows/.github/workflows/github-test-workflow.yaml@v1
+  #   permissions:
+  #     pull-requests: write
 
   test-release-tag:
-    needs: test-workflow
+    # needs: test-workflow
     uses: guidion-digital/release-workflows/.github/workflows/github-release-tag-dry-run.yaml@v1
     with:
       branch: ${{ github.ref_name }}

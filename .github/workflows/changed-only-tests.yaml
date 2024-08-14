@@ -22,7 +22,6 @@ jobs:
         id: calc-fetch-depth
         run: |
           DEPTH="$(( ${{ inputs.fetch_depth }} + 1 ))"
-          echo "fetch_depth=$DEPTH" >> $GITHUB_OUTPUT
 
   test:
     needs: calculate-fetch-depth

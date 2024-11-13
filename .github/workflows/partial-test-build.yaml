@@ -18,6 +18,11 @@ on:
         required: false
         type: boolean
         default: true
+      enable_tsc:
+        description: Whether to enable TSC
+        required: false
+        type: boolean
+        default: true
       enable_tests:
         description: Whether to skip tests
         required: false
@@ -67,6 +72,9 @@ jobs:
       - name: Lint
         if: ${{ inputs.enable_linting }}
         run: npm run lint -- --max-warnings=0
+      - name: TSC
+        if: ${{ inputs.enable_tsc }}
+        run: npm run tsc;
       - name: Build
         if: ${{ inputs.enable_build }}
         run: npm run build

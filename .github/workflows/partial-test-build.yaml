@@ -5,12 +5,8 @@ name: Run tests and build
 on:
   workflow_call:
     inputs:
-      environment_name:
-        description: The Github environment containing all the variables needed
-        required: false
-        type: string
       concurrency_name:
-        description: Concurrency name used. Falls back to environment name if not set
+        description: Identifier of a group to use to avoid concurrency
         required: false
         type: string
       enable_linting:
@@ -43,18 +39,27 @@ on:
         required: false
         type: boolean
         default: true
-      distPath:
-        description: The path to the dist folder
+      source_path:
+        description: The path to the folder or file to deploy
         required: false
         type: string
         default: dist
+      retention_days:
+        description: How long to keep the build artifacts
+        required: false
+        type: number
+        default: 2
+      disable_artefacts:
+        description: Whether to upload artefacts for deploying
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   test_and_build:
     name: Test and Build
-    environment: "${{ inputs.environment_name }}"
     concurrency:
-      group: ${{ inputs.concurrency_name || inputs.environment_name }}
+      group: ${{ inputs.concurrency_name }}
       cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
@@ -82,8 +87,9 @@ jobs:
         if: ${{ inputs.enable_tests }}
         run: npm test
       - name: Upload dist folder
-        if: ${{ inputs.enable_build }}
+        if: ${{ inputs.enable_build && inputs.disable_artefacts == false }}
         uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: ${{ inputs.distPath }}
+          name: build-and-terraform
+          retention-days: ${{ inputs.retention_days }}
+          path: ${{ inputs.source_path }}

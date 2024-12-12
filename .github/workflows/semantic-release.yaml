@@ -23,6 +23,11 @@ on:
         required: false
         type: string
         default: dist
+      node_version:
+        description: 'The node version to use'
+        required: false
+        type: string
+        default: '22.x'
 
 jobs:
   release:
@@ -38,10 +43,10 @@ jobs:
         with:
           name: dist
           path: ${{ inputs.distPath }}
-      - name: Use Node.js 20.x
+      - name: Use Node.js ${{ inputs.node_version }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ inputs.node_version }}
           cache: "npm"
       - name: Setup .npmrc
         if: ${{ inputs.enable_npmrc_echo }}

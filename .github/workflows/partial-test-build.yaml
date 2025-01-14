@@ -54,6 +54,11 @@ on:
         required: false
         type: boolean
         default: false
+      node_version:
+        description: 'The node version to use'
+        required: false
+        type: string
+        default: '20.x'
 
 jobs:
   test_and_build:
@@ -64,10 +69,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js 20.x
+      - name: Use Node.js ${{ inputs.node_version }}
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: ${{ inputs.node_version }}
           cache: "npm"
       - name: Setup .npmrc
         if: ${{ inputs.enable_npmrc_echo }}

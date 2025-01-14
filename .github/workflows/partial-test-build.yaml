@@ -58,7 +58,7 @@ on:
         description: 'The node version to use'
         required: false
         type: string
-        default: '22.x'
+        default: '20.x'
 
 jobs:
   test_and_build:

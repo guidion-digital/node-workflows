@@ -15,7 +15,7 @@ on:
         description: 'The node version to use'
         required: false
         type: string
-        default: '20.x'
+        default: '22.x'
 
 jobs:
   calculate-fetch-depth:

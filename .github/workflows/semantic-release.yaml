@@ -37,11 +37,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Download dist folder
+      - name: Download build folder
         if: ${{ inputs.enable_artifact_download }}
         uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: build
           path: ${{ inputs.distPath }}
       - name: Use Node.js ${{ inputs.node_version }}
         uses: actions/setup-node@v4

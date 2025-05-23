@@ -34,11 +34,6 @@ on:
         required: false
         type: boolean
         default: true
-      enable_artifact_upload:
-        description: Whether to upload the dist folder as an artifact
-        required: false
-        type: boolean
-        default: true
       source_path:
         description: The path to the folder or file to deploy
         required: false
@@ -51,6 +46,11 @@ on:
         default: 2
       disable_artefacts:
         description: Whether to upload artefacts for deploying
+        required: false
+        type: boolean
+        default: false
+      artifact_for_terraform:
+        description: Whether to adjust required inputs for the terraform step
         required: false
         type: boolean
         default: false
@@ -95,6 +95,6 @@ jobs:
         if: ${{ inputs.enable_build && inputs.disable_artefacts == false }}
         uses: actions/upload-artifact@v4
         with:
-          name: build-and-terraform
+          name: ${{ inputs.artifact_for_terraform && 'build-and-terraform' || 'build' }}
           retention-days: ${{ inputs.retention_days }}
           path: ${{ inputs.source_path }}

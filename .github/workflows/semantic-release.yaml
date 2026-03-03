@@ -28,6 +28,11 @@ on:
         required: false
         type: string
         default: '22.x'
+      fetch_depth:
+        description: 'Fetch depth in git'
+        required: false
+        type: number
+        default: 1
 
 jobs:
   release:
@@ -37,6 +42,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with: 
+          fetch-depth: ${{ inputs.fetch_depth }}
       - name: Download build folder
         if: ${{ inputs.enable_artifact_download }}
         uses: actions/download-artifact@v4

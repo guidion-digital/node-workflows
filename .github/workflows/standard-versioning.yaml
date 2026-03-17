@@ -1,0 +1,35 @@
+# Reusable workflow, intended for use in production deploy workflows
+
+name: Run versioning
+
+on:
+  workflow_call:
+    inputs:
+      enable_npmrc_echo:
+        description: Whether to run the .npmrc echo step
+        required: false
+        type: boolean
+        default: true
+      node_version:
+        description: 'The node version to use'
+        required: false
+        type: string
+        default: '22.x'
+
+jobs:
+  versioning:
+    name: Versioning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        name: Use Node.js ${{ inputs.node_version }}
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: npm
+      - run: npm ci
+      - run: npm run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -15,7 +15,7 @@ on:
         description: 'The node version to use'
         required: false
         type: string
-        default: '22.x'
+        default: '24.x'
 
 jobs:
   calculate-fetch-depth:
@@ -31,11 +31,11 @@ jobs:
     needs: calculate-fetch-depth
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: ${{ needs.calculate-fetch-depth.outputs.fetch_depth }}
       - name: Use Node.js ${{ inputs.node_version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ inputs.node_version }}
           cache: "npm"

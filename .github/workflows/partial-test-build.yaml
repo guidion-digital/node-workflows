@@ -93,7 +93,7 @@ jobs:
         run: npm test
       - name: Upload dist folder
         if: ${{ inputs.enable_build && inputs.disable_artefacts == false }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.artifact_for_terraform && 'build-and-terraform' || 'build' }}
           retention-days: ${{ inputs.retention_days }}

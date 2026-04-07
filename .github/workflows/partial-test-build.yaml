@@ -58,7 +58,7 @@ on:
         description: 'The node version to use'
         required: false
         type: string
-        default: '22.x'
+        default: '24.x'
 
 jobs:
   test_and_build:
@@ -68,9 +68,9 @@ jobs:
       cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Use Node.js ${{ inputs.node_version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ inputs.node_version }}
           cache: "npm"
@@ -93,7 +93,7 @@ jobs:
         run: npm test
       - name: Upload dist folder
         if: ${{ inputs.enable_build && inputs.disable_artefacts == false }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.artifact_for_terraform && 'build-and-terraform' || 'build' }}
           retention-days: ${{ inputs.retention_days }}

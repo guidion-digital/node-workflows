@@ -27,7 +27,7 @@ on:
         description: 'The node version to use'
         required: false
         type: string
-        default: '22.x'
+        default: '24.x'
       fetch_depth:
         description: 'Fetch depth in git'
         required: false
@@ -41,17 +41,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with: 
           fetch-depth: ${{ inputs.fetch_depth }}
       - name: Download build folder
         if: ${{ inputs.enable_artifact_download }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: build
           path: ${{ inputs.distPath }}
       - name: Use Node.js ${{ inputs.node_version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ inputs.node_version }}
           cache: "npm"

@@ -48,4 +48,4 @@ jobs:
       - name: TypeScript Compile
         run: npm run tsc
       - name: Changed-files test
-        run: npm run test:changedsince ${{ inputs.base_sha }} -- --ci --runInBand --reportTestSuiteErrors=true
+        run: npm run test:changedsince ${{ inputs.base_sha }} -- --ci --reportTestSuiteErrors=true

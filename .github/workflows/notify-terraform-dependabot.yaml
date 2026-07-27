@@ -8,6 +8,21 @@ on:
         required: false
         type: string
         default: C0BA7GJEXKR
+      force_notify:
+        description: Bypass Dependabot checks (manual workflow_dispatch test)
+        required: false
+        type: boolean
+        default: false
+      test_pr_title:
+        description: Fake Dependabot PR title used when force_notify is true
+        required: false
+        type: string
+        default: Bump guidion/app-api-lambda/aws from 21.0.0 to 22.0.0
+      test_pr_url:
+        description: Fake PR URL used when force_notify is true
+        required: false
+        type: string
+        default: https://github.com/guidion-digital/aws-partner-apis/pull/147
 
 jobs:
   notify:
@@ -15,13 +30,19 @@ jobs:
     runs-on: ubuntu-latest
 
     if: >
-      github.event.pull_request.user.login == 'dependabot[bot]' &&
-      contains(github.event.pull_request.labels.*.name, 'dependencies') &&
-      contains(github.event.pull_request.labels.*.name, 'terraform')
+      inputs.force_notify ||
+      (
+        github.event.pull_request.user.login == 'dependabot[bot]' &&
+        contains(github.event.pull_request.labels.*.name, 'dependencies') &&
+        contains(github.event.pull_request.labels.*.name, 'terraform')
+      )
 
     env:
       SLACK_CHANNEL: ${{ inputs.slack_channel }}
       SLACK_TOKEN: ${{ secrets.slack_token }}
+      FORCE_NOTIFY: ${{ inputs.force_notify }}
+      TEST_PR_TITLE: ${{ inputs.test_pr_title }}
+      TEST_PR_URL: ${{ inputs.test_pr_url }}
 
     steps:
       - name: Send Slack notification
@@ -29,8 +50,13 @@ jobs:
         run: |
           REPO_NAME="${GITHUB_REPOSITORY##*/}"
 
-          PR_TITLE="$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")"
-          PR_URL="$(jq -r '.pull_request.html_url' "$GITHUB_EVENT_PATH")"
+          if [ "$FORCE_NOTIFY" = "true" ]; then
+            PR_TITLE="$TEST_PR_TITLE"
+            PR_URL="$TEST_PR_URL"
+          else
+            PR_TITLE="$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")"
+            PR_URL="$(jq -r '.pull_request.html_url' "$GITHUB_EVENT_PATH")"
+          fi
 
           MODULE="$(printf '%s\n' "$PR_TITLE" | sed -E 's/^.*[Bb]ump[[:space:]]+([^[:space:]]+)[[:space:]]+from[[:space:]]+.*/\1/; t; s/^.*[Uu]pdate[[:space:]]+([^[:space:]]+)[[:space:]]+requirement[[:space:]]+from[[:space:]]+.*/\1/; t; s/.*/Terraform module/')"
           OLD_VERSION="$(printf '%s\n' "$PR_TITLE" | sed -E 's/^.*[[:space:]]from[[:space:]]+([^[:space:]]+)[[:space:]]to[[:space:]]+.*/\1/; t; s/.*/unknown/')"

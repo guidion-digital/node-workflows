@@ -1,0 +1,76 @@
+name: Notify Slack about Terraform Dependabot PR
+
+on:
+  workflow_call:
+    inputs:
+      slack_channel:
+        description: Slack channel ID to notify
+        required: false
+        type: string
+        default: C0BA7GJEXKR
+
+jobs:
+  notify:
+    name: Notify Slack
+    runs-on: ubuntu-latest
+
+    if: >
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      contains(github.event.pull_request.labels.*.name, 'dependencies') &&
+      contains(github.event.pull_request.labels.*.name, 'terraform')
+
+    env:
+      SLACK_CHANNEL: ${{ inputs.slack_channel }}
+      SLACK_TOKEN: ${{ secrets.slack_token }}
+
+    steps:
+      - name: Send Slack notification
+        shell: bash
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+
+          PR_TITLE="$(jq -r '.pull_request.title' "$GITHUB_EVENT_PATH")"
+          PR_URL="$(jq -r '.pull_request.html_url' "$GITHUB_EVENT_PATH")"
+
+          MODULE="$(printf '%s\n' "$PR_TITLE" | sed -E 's/^.*[Bb]ump[[:space:]]+([^[:space:]]+)[[:space:]]+from[[:space:]]+.*/\1/; t; s/^.*[Uu]pdate[[:space:]]+([^[:space:]]+)[[:space:]]+requirement[[:space:]]+from[[:space:]]+.*/\1/; t; s/.*/Terraform module/')"
+          OLD_VERSION="$(printf '%s\n' "$PR_TITLE" | sed -E 's/^.*[[:space:]]from[[:space:]]+([^[:space:]]+)[[:space:]]to[[:space:]]+.*/\1/; t; s/.*/unknown/')"
+          NEW_VERSION="$(printf '%s\n' "$PR_TITLE" | sed -E 's/^.*[[:space:]]to[[:space:]]+([^[:space:]]+).*$/\1/; t; s/.*/unknown/')"
+
+          MESSAGE="New Terraform version available for ${REPO_NAME}: ${MODULE} can be updated from ${OLD_VERSION} to ${NEW_VERSION}"
+
+          PAYLOAD=$(jq -n \
+            --arg channel "$SLACK_CHANNEL" \
+            --arg message "$MESSAGE" \
+            --arg pr_url "$PR_URL" \
+            '{
+              channel: $channel,
+              text: $message,
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: $message
+                  }
+                },
+                {
+                  type: "actions",
+                  elements: [
+                    {
+                      type: "button",
+                      text: {
+                        type: "plain_text",
+                        text: "View PR"
+                      },
+                      url: $pr_url,
+                      action_id: "view_pr"
+                    }
+                  ]
+                }
+              ]
+            }')
+
+          curl -sS -X POST https://slack.com/api/chat.postMessage \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $SLACK_TOKEN" \
+            -d "$PAYLOAD"

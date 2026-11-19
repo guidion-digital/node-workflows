@@ -1,4 +1,7 @@
 # Reusable workflow, intended for use in production deployments
+# NOTE: npm publishing uses trusted publishing (OIDC). The workflow filename is part of
+# the trusted publisher configuration on npmjs.com, so if this workflow is renamed
+# the trusted publisher settings of every published package must be updated too.
 name: Semantic release
 
 on:
@@ -64,5 +67,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Remove the .npmrc (written by "Setup .npmrc" for npm install) so semantic-release
+          # publishes via trusted publishing instead of the token.
+          # TODO: remove `rm -f .npmrc` when the token passed is read-only
           rm -f .npmrc
           npm run semantic-release
